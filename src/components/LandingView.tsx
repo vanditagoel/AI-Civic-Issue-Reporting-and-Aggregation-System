@@ -13,6 +13,11 @@ import {
   Clock,
   ChevronRight,
   TrendingUp,
+  UserCheck,
+  Lock,
+  Cpu,
+  BarChart3,
+  Sliders,
 } from 'lucide-react';
 import { ConsolidatedIssue, DashboardStats, UserRole } from '../types/index.ts';
 
@@ -23,6 +28,7 @@ interface LandingViewProps {
   onOpenReportModal: () => void;
   onNavigate: (view: string) => void;
   onOpenIssue?: (issue: ConsolidatedIssue) => void;
+  onOpenAdminAuthModal?: () => void;
 }
 
 export const LandingView: React.FC<LandingViewProps> = ({
@@ -32,6 +38,7 @@ export const LandingView: React.FC<LandingViewProps> = ({
   onOpenReportModal,
   onNavigate,
   onOpenIssue,
+  onOpenAdminAuthModal,
 }) => {
   const recentIssues = issues.slice(0, 4);
 
@@ -71,6 +78,20 @@ export const LandingView: React.FC<LandingViewProps> = ({
                 className="flex items-center gap-2 rounded-md border border-[#D6D3CB] bg-[#F5F3EC] hover:bg-[#ECE8DF] px-5 py-3 text-xs font-semibold text-[#191C1B] transition-colors"
               >
                 <span>Explore Active Issues</span>
+              </button>
+
+              <button
+                onClick={() => {
+                  if (onOpenAdminAuthModal) onOpenAdminAuthModal();
+                  else {
+                    onSelectRole('ADMIN');
+                    onNavigate('admin-dashboard');
+                  }
+                }}
+                className="flex items-center gap-1.5 rounded-md border border-[#1B4D3E]/40 bg-[#F2F7F4] hover:bg-[#E2EFE7] px-4 py-3 text-xs font-semibold text-[#1B4D3E] transition-colors"
+              >
+                <Lock className="h-3.5 w-3.5" />
+                <span>Officer Access Portal</span>
               </button>
             </div>
           </div>
@@ -122,10 +143,13 @@ export const LandingView: React.FC<LandingViewProps> = ({
             <div className="pt-2 border-t border-[#D6D3CB] flex items-center justify-between text-[11px] text-[#706D66]">
               <span>Coverage: 7 Wards</span>
               <button
-                onClick={() => onNavigate('admin-dashboard')}
+                onClick={() => {
+                  onSelectRole('ADMIN');
+                  onNavigate('admin-dashboard');
+                }}
                 className="font-medium text-[#1B4D3E] hover:underline flex items-center gap-1"
               >
-                <span>Operations Desk</span>
+                <span>Enter Operations Desk</span>
                 <ArrowRight className="h-3 w-3" />
               </button>
             </div>
@@ -133,8 +157,133 @@ export const LandingView: React.FC<LandingViewProps> = ({
         </div>
       </section>
 
-      {/* Section 2: Recently Reported Issues (Editorial List) */}
-      <section className="space-y-6">
+      {/* Section 2: Clear Role Experience Differentiation (Citizen vs Officer) */}
+      <section className="space-y-6 pt-2">
+        <div className="max-w-2xl">
+          <span className="text-[10px] font-mono uppercase tracking-widest text-[#706D66]">
+            Platform Governance &amp; Roles
+          </span>
+          <h2 className="font-serif text-2xl sm:text-3xl font-bold text-[#191C1B] mt-1">
+            Two Distinct Operating Experiences
+          </h2>
+          <p className="text-xs sm:text-sm text-[#525854] mt-1.5 leading-relaxed">
+            CivicLens provides distinct interfaces with real access controls tailored for community contributors and municipal city operations.
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* Citizen Card */}
+          <div className="p-6 rounded-2xl border border-[#D6D3CB] bg-white space-y-4 shadow-xs">
+            <div className="flex items-center justify-between border-b border-[#E7E5DF] pb-3">
+              <div className="flex items-center gap-2">
+                <div className="h-8 w-8 rounded-lg bg-[#E8EFEA] text-[#1B4D3E] flex items-center justify-center">
+                  <UserCheck className="h-4 w-4" />
+                </div>
+                <div>
+                  <span className="text-[10px] font-mono uppercase text-[#706D66] block font-semibold">Role: Community</span>
+                  <h3 className="font-serif font-bold text-lg text-[#191C1B]">Citizen Contributor</h3>
+                </div>
+              </div>
+              <span className="font-mono text-[10px] text-[#1B4D3E] bg-[#E8EFEA] px-2 py-0.5 rounded font-bold">
+                Public Access
+              </span>
+            </div>
+
+            <p className="text-xs text-[#525854] leading-relaxed">
+              Designed for residents reporting street hazards, tracking local ward maintenance, and receiving alerts as repairs proceed.
+            </p>
+
+            <ul className="text-xs text-[#444845] space-y-2 border-y border-[#E7E5DF] py-3">
+              <li className="flex items-center gap-2">
+                <CheckCircle className="h-3.5 w-3.5 text-[#1B4D3E] flex-shrink-0" />
+                <span>File reports with real-time AI Listener validation</span>
+              </li>
+              <li className="flex items-center gap-2">
+                <CheckCircle className="h-3.5 w-3.5 text-[#1B4D3E] flex-shrink-0" />
+                <span>Personal Citizen Ledger tracking submission history</span>
+              </li>
+              <li className="flex items-center gap-2">
+                <CheckCircle className="h-3.5 w-3.5 text-[#1B4D3E] flex-shrink-0" />
+                <span>View public work order progression on your street</span>
+              </li>
+              <li className="flex items-center gap-2">
+                <CheckCircle className="h-3.5 w-3.5 text-[#1B4D3E] flex-shrink-0" />
+                <span>Instant notifications when your notice is merged or resolved</span>
+              </li>
+            </ul>
+
+            <button
+              onClick={() => {
+                onSelectRole('CITIZEN');
+                onNavigate('citizen-dashboard');
+              }}
+              className="w-full py-2.5 rounded-md border border-[#D6D3CB] bg-[#F5F3EC] hover:bg-[#EAE6DC] text-[#191C1B] font-semibold text-xs transition-colors flex items-center justify-center gap-2"
+            >
+              <span>Open Citizen Portal (Vandita Goel)</span>
+              <ArrowRight className="h-3.5 w-3.5" />
+            </button>
+          </div>
+
+          {/* Officer Card */}
+          <div className="p-6 rounded-2xl border border-[#1B4D3E]/40 bg-[#F2F7F4] space-y-4 shadow-xs">
+            <div className="flex items-center justify-between border-b border-[#1B4D3E]/20 pb-3">
+              <div className="flex items-center gap-2">
+                <div className="h-8 w-8 rounded-lg bg-[#1B4D3E] text-white flex items-center justify-center">
+                  <Building className="h-4 w-4" />
+                </div>
+                <div>
+                  <span className="text-[10px] font-mono uppercase text-[#1B4D3E] block font-semibold">Role: Authority</span>
+                  <h3 className="font-serif font-bold text-lg text-[#191C1B]">Municipal Officer &amp; Dispatcher</h3>
+                </div>
+              </div>
+              <span className="font-mono text-[10px] text-white bg-[#1B4D3E] px-2 py-0.5 rounded font-bold">
+                Admin Locked
+              </span>
+            </div>
+
+            <p className="text-xs text-[#525854] leading-relaxed">
+              Restricted console for city dispatchers, department chiefs, and triage officers to assign crews and supervise AI agent decisions.
+            </p>
+
+            <ul className="text-xs text-[#444845] space-y-2 border-y border-[#1B4D3E]/20 py-3">
+              <li className="flex items-center gap-2">
+                <CheckCircle className="h-3.5 w-3.5 text-[#1B4D3E] flex-shrink-0" />
+                <span>Human-in-the-loop Triage Desk for ambiguous clusters</span>
+              </li>
+              <li className="flex items-center gap-2">
+                <CheckCircle className="h-3.5 w-3.5 text-[#1B4D3E] flex-shrink-0" />
+                <span>Transition work order status (In Progress, Resolved, Closed)</span>
+              </li>
+              <li className="flex items-center gap-2">
+                <CheckCircle className="h-3.5 w-3.5 text-[#1B4D3E] flex-shrink-0" />
+                <span>Reassign municipal bureaus and deploy repair crews</span>
+              </li>
+              <li className="flex items-center gap-2">
+                <CheckCircle className="h-3.5 w-3.5 text-[#1B4D3E] flex-shrink-0" />
+                <span>Full Gemini multi-agent telemetry stream &amp; prompt sandbox</span>
+              </li>
+            </ul>
+
+            <button
+              onClick={() => {
+                if (onOpenAdminAuthModal) onOpenAdminAuthModal();
+                else {
+                  onSelectRole('ADMIN');
+                  onNavigate('admin-dashboard');
+                }
+              }}
+              className="w-full py-2.5 rounded-md bg-[#1B4D3E] hover:bg-[#133E32] text-white font-semibold text-xs transition-colors flex items-center justify-center gap-2 shadow-xs"
+            >
+              <Lock className="h-3.5 w-3.5" />
+              <span>Sign In to Officer Console (Director Marcus Vance)</span>
+              <ArrowRight className="h-3.5 w-3.5" />
+            </button>
+          </div>
+        </div>
+      </section>
+
+      {/* Section 3: Recently Reported Issues (Editorial List) */}
+      <section className="space-y-6 pt-4 border-t border-[#E7E5DF]">
         <div className="flex flex-col sm:flex-row sm:items-baseline justify-between gap-2 pb-3 border-b border-[#E7E5DF]">
           <div>
             <span className="text-[10px] font-mono uppercase tracking-widest text-[#706D66]">
@@ -217,7 +366,7 @@ export const LandingView: React.FC<LandingViewProps> = ({
         </div>
       </section>
 
-      {/* Section 3: The 4-Agent Pipeline Field Dossier */}
+      {/* Section 4: The 4-Agent Pipeline Field Dossier */}
       <section className="space-y-6 pt-4 border-t border-[#E7E5DF]">
         <div className="max-w-2xl">
           <span className="text-[10px] font-mono uppercase tracking-widest text-[#706D66]">
@@ -282,7 +431,7 @@ export const LandingView: React.FC<LandingViewProps> = ({
         </div>
       </section>
 
-      {/* Section 4: Community Impact & Closing Call */}
+      {/* Section 5: Community Impact & Closing Call */}
       <section className="bg-[#1B4D3E] text-white rounded-2xl p-8 sm:p-12 space-y-6">
         <div className="max-w-2xl space-y-3">
           <span className="text-[10px] font-mono uppercase tracking-widest text-[#A3E5D0]">
@@ -308,6 +457,18 @@ export const LandingView: React.FC<LandingViewProps> = ({
             className="rounded-md border border-white/30 hover:bg-white/10 text-white font-medium text-xs px-5 py-3 transition-colors"
           >
             Open My Citizen Ledger
+          </button>
+          <button
+            onClick={() => {
+              if (onOpenAdminAuthModal) onOpenAdminAuthModal();
+              else {
+                onSelectRole('ADMIN');
+                onNavigate('admin-dashboard');
+              }
+            }}
+            className="rounded-md bg-[#0D2D24] border border-[#205243] hover:bg-[#071F18] text-[#A3E5D0] font-mono text-xs px-5 py-3 transition-colors"
+          >
+            Officer Sign In
           </button>
         </div>
       </section>

@@ -25,6 +25,7 @@ import { AnalyticsView } from './components/AnalyticsView.tsx';
 import { ReportSubmissionModal } from './components/ReportSubmissionModal.tsx';
 import { IssueDetailModal } from './components/IssueDetailModal.tsx';
 import { DjangoDocsModal } from './components/DjangoDocsModal.tsx';
+import { AdminAuthModal } from './components/AdminAuthModal.tsx';
 
 export default function App() {
   const [currentRole, setCurrentRole] = useState<UserRole>('CITIZEN');
@@ -64,6 +65,7 @@ export default function App() {
   // Modals state
   const [isReportModalOpen, setIsReportModalOpen] = useState(false);
   const [isDocsModalOpen, setIsDocsModalOpen] = useState(false);
+  const [isAdminAuthModalOpen, setIsAdminAuthModalOpen] = useState(false);
   const [selectedIssueModal, setSelectedIssueModal] = useState<ConsolidatedIssue | null>(null);
 
   // Fetch initial data
@@ -95,7 +97,7 @@ export default function App() {
     fetchData();
   }, [fetchData]);
 
-  // Role toggle
+  // Role toggle with automatic navigation to the appropriate home view
   const handleToggleRole = (newRole: UserRole) => {
     setCurrentRole(newRole);
     if (newRole === 'ADMIN') {
@@ -107,9 +109,8 @@ export default function App() {
         ward: 'Ward 1 (Civic Center)',
         avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=120&auto=format&fit=crop&q=80',
       });
-      if (activeView === 'citizen-dashboard') {
-        setActiveView('admin-dashboard');
-      }
+      // Direct user straight to Operations Desk
+      setActiveView('admin-dashboard');
     } else {
       setCurrentUser({
         id: 'usr-citizen-1',
@@ -119,9 +120,8 @@ export default function App() {
         ward: 'Ward 4 (Central Hospital & Metro Corridor)',
         avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=120&auto=format&fit=crop&q=80',
       });
-      if (activeView === 'admin-dashboard' || activeView === 'review-queue') {
-        setActiveView('citizen-dashboard');
-      }
+      // Direct user straight to My Citizen Ledger
+      setActiveView('citizen-dashboard');
     }
   };
 
@@ -254,15 +254,20 @@ export default function App() {
     }
   };
 
+  const pendingReviewCount = reviewQueue.filter((q) => q.status === 'PENDING').length;
+
   return (
     <div className="min-h-screen bg-[#FAF9F5] text-[#191C1B] flex flex-col font-sans selection:bg-[#1B4D3E] selection:text-white">
       {/* Top Navigation */}
       <Navbar
         currentRole={currentRole}
+        currentUser={currentUser}
         onToggleRole={handleToggleRole}
         onOpenReportModal={() => setIsReportModalOpen(true)}
         onOpenDocsModal={() => setIsDocsModalOpen(true)}
+        onOpenAdminAuthModal={() => setIsAdminAuthModalOpen(true)}
         notifications={notifications}
+        pendingReviewCount={pendingReviewCount}
         onMarkNotificationRead={handleMarkNotificationRead}
         onResetDemo={handleResetDemo}
         activeView={activeView}
@@ -288,6 +293,7 @@ export default function App() {
                 onOpenReportModal={() => setIsReportModalOpen(true)}
                 onNavigate={setActiveView}
                 onOpenIssue={(iss) => setSelectedIssueModal(iss)}
+                onOpenAdminAuthModal={() => setIsAdminAuthModalOpen(true)}
               />
             )}
 
@@ -359,6 +365,22 @@ export default function App() {
           </div>
 
           <div className="flex flex-wrap items-center gap-4 text-xs font-mono">
+            {currentRole === 'CITIZEN' ? (
+              <button
+                onClick={() => setIsAdminAuthModalOpen(true)}
+                className="text-[#1B4D3E] font-semibold underline hover:text-[#133E32]"
+              >
+                Officer Access Gate
+              </button>
+            ) : (
+              <button
+                onClick={() => handleToggleRole('CITIZEN')}
+                className="text-[#525854] hover:underline"
+              >
+                Switch to Citizen View
+              </button>
+            )}
+            <span className="text-[#D6D3CB]">&bull;</span>
             <button
               onClick={() => setIsDocsModalOpen(true)}
               className="hover:text-[#1B4D3E] underline transition-colors"
@@ -398,6 +420,12 @@ export default function App() {
       <DjangoDocsModal
         isOpen={isDocsModalOpen}
         onClose={() => setIsDocsModalOpen(false)}
+      />
+
+      <AdminAuthModal
+        isOpen={isAdminAuthModalOpen}
+        onClose={() => setIsAdminAuthModalOpen(false)}
+        onLoginAsAdmin={() => handleToggleRole('ADMIN')}
       />
     </div>
   );

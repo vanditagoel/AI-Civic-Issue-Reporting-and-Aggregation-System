@@ -362,52 +362,108 @@ export const IssueDetailModal: React.FC<IssueDetailModalProps> = ({
         {/* TAB 3: Operations & Work Order */}
         {activeTab === 'dispatch' && (
           <div className="mt-6 space-y-5 text-xs">
-            <div className="p-5 rounded-xl border border-[#D6D3CB] bg-white space-y-4">
-              <h3 className="font-serif font-bold text-base text-[#191C1B]">
-                Municipal Work Order Dispatch Controls
-              </h3>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-xs font-semibold text-[#191C1B] mb-1.5">
-                    Operational Status
-                  </label>
-                  <select
-                    value={issue.status}
-                    onChange={(e) => onUpdateStatus(issue.id, e.target.value as IssueStatus)}
-                    className="w-full rounded-md border border-[#D6D3CB] bg-white px-3 py-2 text-xs text-[#191C1B] focus:border-[#1B4D3E] focus:outline-none"
-                  >
-                    <option value="NEW">NEW - Intake Logged</option>
-                    <option value="TRIAGED">TRIAGED - AI Priority Set</option>
-                    <option value="ASSIGNED">ASSIGNED - Assigned to Dept</option>
-                    <option value="IN_PROGRESS">IN_PROGRESS - Work Crew On Site</option>
-                    <option value="RESOLVED">RESOLVED - Fixed &amp; Inspected</option>
-                    <option value="CLOSED">CLOSED - Verified Complete</option>
-                  </select>
+            {currentRole === 'ADMIN' ? (
+              /* Officer Dispatch Controls */
+              <div className="p-5 rounded-xl border border-[#1B4D3E]/30 bg-white space-y-4 shadow-xs">
+                <div className="flex items-center justify-between border-b border-[#E7E5DF] pb-2">
+                  <div className="flex items-center gap-2">
+                    <span className="font-mono text-[10px] uppercase font-bold text-[#1B4D3E] bg-[#E8EFEA] px-2 py-0.5 rounded">
+                      Authorized Officer Controls
+                    </span>
+                    <h3 className="font-serif font-bold text-base text-[#191C1B]">
+                      Municipal Work Order Dispatch
+                    </h3>
+                  </div>
+                  <span className="text-[11px] font-mono text-[#706D66]">
+                    Docket #{issue.id}
+                  </span>
                 </div>
 
-                <div>
-                  <label className="block text-xs font-semibold text-[#191C1B] mb-1.5">
-                    Assigned Municipal Department
-                  </label>
-                  <select
-                    value={issue.assignedDepartment}
-                    onChange={(e) => onUpdateDepartment(issue.id, e.target.value)}
-                    className="w-full rounded-md border border-[#D6D3CB] bg-white px-3 py-2 text-xs text-[#191C1B] focus:border-[#1B4D3E] focus:outline-none"
-                  >
-                    {DEPARTMENTS.map((d) => (
-                      <option key={d} value={d}>
-                        {d}
-                      </option>
-                    ))}
-                  </select>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs font-semibold text-[#191C1B] mb-1.5">
+                      Operational Status
+                    </label>
+                    <select
+                      value={issue.status}
+                      onChange={(e) => onUpdateStatus(issue.id, e.target.value as IssueStatus)}
+                      className="w-full rounded-md border border-[#D6D3CB] bg-[#FAF9F5] px-3 py-2 text-xs text-[#191C1B] focus:border-[#1B4D3E] focus:outline-none font-sans font-medium"
+                    >
+                      <option value="NEW">NEW - Intake Logged</option>
+                      <option value="TRIAGED">TRIAGED - AI Priority Set</option>
+                      <option value="ASSIGNED">ASSIGNED - Assigned to Dept</option>
+                      <option value="IN_PROGRESS">IN_PROGRESS - Work Crew On Site</option>
+                      <option value="RESOLVED">RESOLVED - Fixed &amp; Inspected</option>
+                      <option value="CLOSED">CLOSED - Verified Complete</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-semibold text-[#191C1B] mb-1.5">
+                      Assigned Municipal Department
+                    </label>
+                    <select
+                      value={issue.assignedDepartment}
+                      onChange={(e) => onUpdateDepartment(issue.id, e.target.value)}
+                      className="w-full rounded-md border border-[#D6D3CB] bg-[#FAF9F5] px-3 py-2 text-xs text-[#191C1B] focus:border-[#1B4D3E] focus:outline-none font-sans font-medium"
+                    >
+                      {DEPARTMENTS.map((d) => (
+                        <option key={d} value={d}>
+                          {d}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+
+                <div className="p-3 rounded-lg bg-[#F4F2EC] text-[11px] text-[#525854]">
+                  💡 <strong>Officer Notification Protocol:</strong> Updating status to "RESOLVED" or "IN_PROGRESS" triggers automated notifications to all {issue.reportsCount} citizen contributors linked to this cluster.
                 </div>
               </div>
+            ) : (
+              /* Citizen Read-Only Work Order Progress View */
+              <div className="p-5 rounded-xl border border-[#D6D3CB] bg-white space-y-4">
+                <div className="border-b border-[#E7E5DF] pb-2">
+                  <span className="font-mono text-[10px] uppercase font-bold text-[#706D66]">
+                    Citizen Progress Monitor
+                  </span>
+                  <h3 className="font-serif font-bold text-base text-[#191C1B]">
+                    Field Maintenance &amp; Repair Status
+                  </h3>
+                </div>
 
-              <div className="p-3 rounded-lg bg-[#F4F2EC] text-[11px] text-[#525854]">
-                Status updates trigger real-time notifications to all {issue.reportsCount} citizen reporters registered in this cluster.
+                {/* Status Progress Stepper */}
+                <div className="grid grid-cols-4 gap-2 text-center text-[10px] font-mono pt-1">
+                  <div className={`p-2 rounded border ${['NEW', 'TRIAGED', 'ASSIGNED', 'IN_PROGRESS', 'RESOLVED'].includes(issue.status) ? 'bg-[#E8EFEA] border-[#1B4D3E] text-[#1B4D3E] font-bold' : 'bg-[#FAF9F5] text-[#858A85] border-[#E7E5DF]'}`}>
+                    1. Triaged
+                  </div>
+                  <div className={`p-2 rounded border ${['ASSIGNED', 'IN_PROGRESS', 'RESOLVED'].includes(issue.status) ? 'bg-[#E8EFEA] border-[#1B4D3E] text-[#1B4D3E] font-bold' : 'bg-[#FAF9F5] text-[#858A85] border-[#E7E5DF]'}`}>
+                    2. Dept Assigned
+                  </div>
+                  <div className={`p-2 rounded border ${['IN_PROGRESS', 'RESOLVED'].includes(issue.status) ? 'bg-[#E8EFEA] border-[#1B4D3E] text-[#1B4D3E] font-bold' : 'bg-[#FAF9F5] text-[#858A85] border-[#E7E5DF]'}`}>
+                    3. In Progress
+                  </div>
+                  <div className={`p-2 rounded border ${issue.status === 'RESOLVED' ? 'bg-[#E8EFEA] border-[#1B4D3E] text-[#1B4D3E] font-bold' : 'bg-[#FAF9F5] text-[#858A85] border-[#E7E5DF]'}`}>
+                    4. Resolved
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs pt-2">
+                  <div className="p-3 rounded-lg bg-[#FAF9F5] border border-[#E7E5DF]">
+                    <span className="text-[10px] font-mono uppercase text-[#706D66] block">Responsible Bureau</span>
+                    <span className="font-semibold text-[#191C1B] text-sm mt-0.5 block">{issue.assignedDepartment}</span>
+                  </div>
+                  <div className="p-3 rounded-lg bg-[#FAF9F5] border border-[#E7E5DF]">
+                    <span className="text-[10px] font-mono uppercase text-[#706D66] block">Current Status</span>
+                    <span className="font-semibold text-[#1B4D3E] text-sm mt-0.5 block">{issue.status.replace('_', ' ')}</span>
+                  </div>
+                </div>
+
+                <div className="p-3 rounded-lg bg-[#F4F2EC] text-[11px] text-[#525854] flex items-center justify-between">
+                  <span>🔒 Operational status transitions require Municipal Officer access.</span>
+                </div>
               </div>
-            </div>
+            )}
           </div>
         )}
 
