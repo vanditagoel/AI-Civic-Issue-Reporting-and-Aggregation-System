@@ -1,0 +1,8 @@
+{
+  "name": "CivicLens - AI Civic Issue Aggregation & Prioritization",
+  "description": "AI-powered municipal civic issue aggregation and prioritization platform with a 4-agent Gemini intelligence pipeline.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
