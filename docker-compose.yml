@@ -1,0 +1,67 @@
+version: '3.9'
+
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: civiclens-postgres
+    restart: always
+    environment:
+      POSTGRES_DB: civiclens_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgrespassword
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d civiclens_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: civiclens-backend
+    restart: always
+    command: >
+      sh -c "python manage.py migrate &&
+             python manage.py seed_demo &&
+             gunicorn config.wsgi:application --bind 0.0.0.0:8000 --workers 3"
+    environment:
+      DATABASE_URL: postgresql://postgres:postgrespassword@db:5432/civiclens_db
+      SECRET_KEY: civiclens-production-secure-key-2026-docker
+      DEBUG: "False"
+      ALLOWED_HOSTS: "localhost,127.0.0.1,backend"
+      CORS_ALLOWED_ORIGINS: "http://localhost:3000,http://127.0.0.1:3000"
+      CSRF_TRUSTED_ORIGINS: "http://localhost:3000,http://127.0.0.1:3000"
+      GEMINI_API_KEY: ${GEMINI_API_KEY:-}
+      GEMINI_MODEL: gemini-2.5-flash
+      JOB_RUNNER: worker
+    ports:
+      - "8000:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+
+  worker:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: civiclens-worker
+    restart: always
+    command: python manage.py run_worker
+    environment:
+      DATABASE_URL: postgresql://postgres:postgrespassword@db:5432/civiclens_db
+      SECRET_KEY: civiclens-production-secure-key-2026-docker
+      GEMINI_API_KEY: ${GEMINI_API_KEY:-}
+      GEMINI_MODEL: gemini-2.5-flash
+    depends_on:
+      db:
+        condition: service_healthy
+      backend:
+        condition: service_started
+
+volumes:
+  postgres_data:
